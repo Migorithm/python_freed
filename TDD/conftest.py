@@ -20,3 +20,7 @@ def pytest_addoption(parser):
         default=False,
         help="new db for each test",
         )
+
+@pytest.fixture(params=[5,6,7])
+def parameters(request):
+    return request.param

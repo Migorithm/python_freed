@@ -280,3 +280,143 @@ def pytest_addoption(parser):
         help="new db for each test",
     )
 ```
+
+### Parametrization
+We’ll look at three ways to implement parametrized testing in pytest in the order in which they should be selected:
+- Parametrizing functions
+- Parametrizing fixtures
+- Using a hook function called **"pytest_generate_tests"**
+
+```python
+from dataclasses import dataclass,asdict
+
+@dataclass
+class User:
+    id :str
+    age:int
+    name:str
+
+def test_finish(): 
+    for u in [
+        User("saka1023",20,"Migo"),
+        User("saka1024",25,"Mago"),
+        User("saka1025",32,"Mego"),    
+    ]:
+        assert u.name.startswith("M")
+
+```
+```sh
+$ pytest test_finish_combined.py
+========================= test session starts ========================== collected 1 item
+test_finish_combined.py . [100%]
+========================== 1 passed in 0.01s ===========================
+```
+It passes but there are some problems:
+- We have one test case reported instead of three.
+- If one of the test cases fails, we really don’t know which one without looking at the traceback or some other debugging information
+- If one of the test cases fails, the test cases following the failure will not be run. pytest stops running a test when an assert fails.
+
+#### Parametrizing Functions
+To parametrize a test function, add parameters to the test definition and use the **@pytest.mark.parametrize()** decorator to define the sets of arguments to pass to the test, like this:
+```python
+@pytest.mark.parametrize(
+    "IDs,Ages,Names",
+    [
+        ("saka1023",20,"MIGO"),
+        ("zaka1023",24,"Zigo"),
+        ("eaka123",93,"Tigo"),
+    ],
+)
+def test_fenish(IDs,Ages,Names):
+    initial_user=User(id=IDs,age=Ages,name=Names)
+    assert initial_user.age >= 20
+
+```
+The first argument to @pytest.mark.parametrize() is a list of names of the parameters.<br>
+They are strings and can be an actual list of strings, as in ["start_summary", "start_state"], or<br>
+they can be a comma-separated string, as in "start_summary, start_state".<br><br>
+
+The second argument to @pytest.mark.parametrize() is our list of test cases.
+
+#### Parametrizing fixtures
+```python
+@pytest.fixture(params=[5,6,7])
+def parameters(request):
+    return request.param
+
+def test_params(parameters):
+    assert parameters>=5
+```
+
+```sh
+TDD/09_parametrization_test.py::test_params[5] PASSED                                                                               [ 71%]
+TDD/09_parametrization_test.py::test_params[6] PASSED                                                                               [ 85%]
+TDD/09_parametrization_test.py::test_params[7] PASSED                                                                               [100%]
+```
+What happens is pytest ends up calling parameters() three times, once each for all values in params.<br>
+Each value of **params** is saved to **request.param** for the fixture to use. 
+
+
+### Configuration files
+Configuration files—those non-test files that affect how pytest runs—save time and duplicated work.<br>
+- **pytest.ini** : This is the primary pytest configuration file that allows you to change pytest's default behaviour. Its location also defines the pytest root directory, or rootdir.
+- **conftest.py** : This file contains fixtures and hook functions. It can exist at the rootdir or in any subdirectory.
+- \_\_init\_\_.py : When put into test subdirectories, this file allows you to have identical test file names in multiple test directories<br><br>
+
+
+PROJECT<br>
+├── ... top level project files, src dir, docs, etc ...<br>
+├── pytest.ini<br>
+└── tests<br>
+  ├── conftest.py <br>
+  ├── api<br>
+  │ ├── \_\_init\_\_.py<br>
+  │ ├── conftest.py<br>
+  │ └── ... test files for api ...<br>
+  └── cli<br>
+    ├── __init__.py<br>
+    ├── conftest.py<br>
+    └── ... test files for cli ...<br>
+
+#### Saving Settings and Flags in pytest.ini
+Let's take a look at an example **pytest.ini** file.
+```ini
+[pytest]
+addopts = 
+  --strict-markers
+  --strict-config
+  -ra
+  -v 
+
+testpaths = tests
+markers =
+  smoke: subset of tests
+  exception: check for expected expcetions
+```
+Explanation: <br>
+The addopts setting enables us to list the pytest flags we always want to run in this project.<br>
+The testpaths setting tells pytest where to look for tests if you haven’t given a file or directory name on the command line.<br>
+
+
+#### Avoiding Test File Name Collision
+The \_\_init\_\_.py file affects pytest in one way and one way only: it allows you to have duplicate test file names.<br>
+If you have \_\_init\_\_.py files in every test subdirectory, you can have the same test file name show up in multiple directories.<br>
+That’s it—the only reason to have a \_\_init\_\_.py file. Here is an example:<br>
+tests_with_init<br>
+├── api<br>
+│ ├── \_\_init\_\_.py<br>
+│ └── test_add.py<br>
+├── cli<br>
+│ ├── \_\_init\_\_.py<br>
+│ └── test_add.py<br>
+└── pytest.ini<br>
+
+```sh
+$ pytest -v tests_with_init
+========================= test session starts ========================== collected 2 items
+tests_with_init/api/test_add.py::test_add PASSED [ 50%] tests_with_init/cli/test_add.py::test_add PASSED [100%]
+========================== 2 passed in 0.02s ===========================
+```
+
+
+
