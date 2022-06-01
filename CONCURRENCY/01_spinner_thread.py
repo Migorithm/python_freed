@@ -1,7 +1,7 @@
 import itertools
 import time
 from threading import Thread, Event
-
+from primes import is_prime
 def spin(msg:str, done:Event ) -> None:        #1
     for char in itertools.cycle(r'\|/-'):      #2
         status=f'\r{char} {msg}'               #3
@@ -12,7 +12,8 @@ def spin(msg:str, done:Event ) -> None:        #1
     print(f'\r{blanks}\r', end='')             #5
 
 def slow() -> int:
-    time.sleep(3)                              #6
+    #time.sleep(3)                              #6
+    is_prime(5_000_111_000_222_021)
     return 42
 
 def supervisor() -> int:

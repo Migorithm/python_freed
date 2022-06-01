@@ -7,6 +7,7 @@ name = "pypi"
 pytest = "*"
 fastapi = "*"
 python-jose = {version = "==3.3.0", extras = ["cryptography"]}
+httpx = "*"
 
 [dev-packages]
 

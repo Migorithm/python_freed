@@ -1,7 +1,7 @@
 import asyncio
 import itertools
 import time
-
+from primes import is_prime_for_coroutine
 async def spin(msg:str ) -> None:       
     for char in itertools.cycle(r'\|/-'):     
         status=f'\r{char} {msg}'               
@@ -15,7 +15,8 @@ async def spin(msg:str ) -> None:
     print(f'\r{blanks}\r', end='')             
 
 async def slow() -> int:
-    await asyncio.sleep(3)  
+    #await asyncio.sleep(3)  
+    await is_prime_for_coroutine(5_000_111_000_222_021)
     return 42
 
 
@@ -24,7 +25,7 @@ def main() -> None:
     print(f"Answer: {result}")
 
 async def supervisor() -> int:
-    spinner = asyncio.create_task(spin("thinking!"))
+    spinner = asyncio.create_task(spin("thinking!")) # When calling .create_task() , the Task is automatically scheduled to run
     print(f"spinner object: {spinner}")
     result = await slow()
     spinner.cancel()
