@@ -8,6 +8,9 @@ pytest = "*"
 fastapi = "*"
 python-jose = {version = "==3.3.0", extras = ["cryptography"]}
 httpx = "*"
+sqlalchemy = "*"
+asyncpg = "*"
+uvicorn = "*"
 
 [dev-packages]
 
