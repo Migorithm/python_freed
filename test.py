@@ -1,14 +1,19 @@
-from typing import TypeAlias
-from pydantic import BaseModel
+from passlib.context import CryptContext
+from fastapi import status 
 
-Symbol: TypeAlias = str
-Atom: TypeAlias = float|int|Symbol
-Expression: TypeAlias = Atom| list
+#passwordhashing 
+pwd_ctx = CryptContext(schemes=["bcrypt"])
+def get_hashed_password(plain_password):
+    return pwd_ctx.hash(plain_password)
 
-class TypeAliasTest(BaseModel):
-    name: Symbol
-    alphanu: Atom
-    whatever:Expression
+def verify_password(plain_password, hashed_password):
+    return pwd_ctx.verify(plain_password,hashed_password)
 
-a= TypeAliasTest(name=32,alphanu=";;",whatever=6)
-print(a)
+
+print(status.HTTP_200_OK)
+print(status.HTTP_500_INTERNAL_SERVER_ERROR)
+print(status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+
+
+

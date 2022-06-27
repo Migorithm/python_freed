@@ -11,6 +11,11 @@ httpx = "*"
 sqlalchemy = "*"
 asyncpg = "*"
 uvicorn = "*"
+python-multipart = "*"
+opencv-python = "*"
+numpy = "*"
+pillow = "*"
+fastapi-sessions = "*"
 
 [dev-packages]
 

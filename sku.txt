@@ -1,0 +1,45 @@
+sn :str 
+transaction_product: TransactionProduct
+product_sellable_sku_id: str 
+product_sellable_sku_snapshot: Optional[dict] 
+title: str 
+image: str
+status: str 
+request_status_date: Mapped[datetime] 
+carrier_name: str 
+carrier_number: str 
+sell_price: float 
+supply_price: float 
+cost: float # 원가
+base_delivery_fee: float # 기본배송비
+calculated_delivery_fee: float  # 계산된 배송비
+channel_commission_rate: float  # 판매채널 수수료
+quantity: int  # 수량
+pg_paid_amount: float  # 주문금액
+point_paid_amount: float  # 사용 포인트금액
+purchased_finalized_date: Mapped[datetime]  # 구매확정시간
+refund_delivery_fee: float  # 반품배송비
+exchange_delivery_fee: float  # 교환배송비
+accumulated_delivery_fee_for_refund: Optional[float] # 실제 환불시 적용되는 배송비
+pg_amount_for_refund: float # PG로 환불받는 금액
+refund_delivery_fee_method: str # 반품부담방법
+exchange_delivery_fee_method: str  # 교환부담방법
+
+sku_cost_over_sales_price: Optional[float] # 직접판매 (보류)
+transaction_sku_logs: Mapped["TransactionSkuLog"] 
+
+
+
+Description:
+상태값 리스트:
+*배송완료 deliver-ok
+*반품거절(접수거절) refund-fail(check-reject)
+*반품거절(동의거절) refund-fail(agree-rejected)
+*반품거절(검수부결-기존물품 재배송 완료) refund-fail(inspect-rejected-DO)
+*반품실패(반품미수령) refund-fail(return-no)
+*새물품 배송완료 exchange-delivery-ok
+*교환거절(접수거절) exchange-fail(check-rejected)
+*교환거절(판매자 동의거절) exchange-fail(agree-rejected)
+*교환거절(검수부결-기존물품 배송완료) exchange-fail(inspect-rejected-do)
+*교환실패(교환품 미수령) exchange-fail(return-no)
+*교환거절(새물품 출고거절-기존물품 재배송 완료) exchange-fail(reship-rejected-DO)
