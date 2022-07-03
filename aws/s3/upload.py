@@ -4,7 +4,8 @@ from time import time
 from fastapi import UploadFile
 import asyncio
 import os
-
+import numpy as np
+import cv2
 class S3Bucket(BaseSettings):
     AWS_S3_BUCKET_NAME_STATIC: str = "random_bucket_name"
     AWS_S3_PUBLIC_URL: str = "https://randome_s3_url"
@@ -33,8 +34,8 @@ class HarmonyS3:
                 tasks[filepath] = task
 
             await asyncio.gather(*tasks.values())
-            for task in tasks:
-                yield task
+            for filepath in tasks:
+                yield filepath
 
     @staticmethod
     def upload_to_bucket(file_objs, dir_name):
@@ -45,3 +46,29 @@ class HarmonyS3:
             service_name="random_service_name",
         )
         return s3.upload_files(file_objs, dir_name)  # Coroutine
+
+
+
+    async def image_resize(image_files:list[UploadFile]):
+        tasks = [asyncio.create_task(image.read()) for image in image_files]
+        contents = await asyncio.gather(*tasks)
+        img_list = []
+        for content in contents:
+            nparr = np.frombuffer(content,np.uint8)
+            img = cv2.imdecode(nparr,cv2.IMREAD_COLOR)
+            height,width,channel = img.shape[:3]
+
+            #resize
+            while height * width * channel > 1024 * 1024 * 2:
+                height *= 0.9
+                width *= 0.9
+            resized_img = cv2.resize(
+                                img, 
+                                (int(width),int(height)),
+                                interpolation=cv2.INTER_AREA
+                                    )
+            print(height*width*channel)
+            img_list.append(resized_img)
+        return img_list              
+
+

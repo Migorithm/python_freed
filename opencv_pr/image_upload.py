@@ -14,7 +14,7 @@ async def prepare(image_files:list[UploadFile]):
         nparr = np.frombuffer(content,np.uint8)
         img = cv2.imdecode(nparr,cv2.IMREAD_COLOR)
         height,width,channel = img.shape[:3]
-        
+
         #resize
         while height * width * channel > 1024 * 1024 * 2:
             height *= 0.9
@@ -31,7 +31,7 @@ async def prepare(image_files:list[UploadFile]):
 
 @app.post("/")
 async def root(files: list[UploadFile] = File(...)):
-    resized_imgs = await prepare(files)
+    resized_imgs = await HarmonyS3.resize(files)
  
     for i in resized_imgs:
         cv2.imshow("small",i)
@@ -45,3 +45,5 @@ async def root(files: list[UploadFile] = File(...)):
 
 if __name__ == "__main__":
     uvicorn.run("image_upload:app",reload=True)
+
+

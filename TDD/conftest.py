@@ -23,4 +23,4 @@ def pytest_addoption(parser):
 
 @pytest.fixture(params=[5,6,7])
 def parameters(request):
-    return request.param
+    yield request.param
